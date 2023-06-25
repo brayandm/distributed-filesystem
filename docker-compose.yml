@@ -54,6 +54,7 @@ services:
         environment:
             - REDIS_HOST=${REDIS_HOST}
             - REDIS_PORT=${REDIS_PORT}
+            - CHUNK_SIZE=${CHUNK_SIZE}
         ports:
             - "127.0.0.1:9080:80"
         volumes:
