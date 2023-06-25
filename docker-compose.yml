@@ -47,6 +47,19 @@ services:
         restart: always
         command: ["sh", "-c", "flask --app=storage_server run --reload --host=0.0.0.0 --port=80"]
 
+    master.test:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-master
+        ports:
+            - "127.0.0.1:9080:80"
+        volumes:
+            - .:/app
+        networks:
+            - distributed-filesystem
+        restart: always
+        command: ["sh", "-c", "flask --app=master run --reload --host=0.0.0.0 --port=80"]
+
 
 networks:
     distributed-filesystem:
