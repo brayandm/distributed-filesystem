@@ -63,6 +63,8 @@ services:
         networks:
             - distributed-filesystem
         restart: always
+        volumes:
+            - 'volume-redis:/data'
         healthcheck:
             test: ["CMD", "redis-cli"]
             timeout: 5s
@@ -71,3 +73,6 @@ services:
 networks:
     distributed-filesystem:
         driver: bridge
+
+volumes:
+    volume-redis:
