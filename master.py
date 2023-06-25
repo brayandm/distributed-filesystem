@@ -17,6 +17,32 @@ storage_servers = [
 ]
 
 
+@apiv1.route("/getsize", methods=["GET"])
+def get_size():
+    if not request.json or not "filename" in request.json:
+        return "filename not provided", 400
+
+    filename = request.json["filename"]
+
+    if not redis.exists(filename):
+        return "file does not exist", 400
+
+    chunk_servers = redis.lrange(filename, 0, -1)
+
+    size = 0
+
+    for chunk_server in chunk_servers:
+        chunk_filename, chunk_server = chunk_server.decode("utf-8").split("@")
+
+        response = requests.get(
+            chunk_server + "/v1/getsize", json={"filename": chunk_filename}
+        )
+
+        size += int(response.text)
+
+    return str(size), 200
+
+
 def get_server():
     server_id = int(redis.incr("server_counter")) - 1
 
