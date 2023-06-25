@@ -30,6 +30,12 @@ docker compose up -d
 python guest.py
 ```
 
+6 - Stop docker compose:
+
+```bash
+docker compose down -v
+```
+
 Notes:
 
 - Be careful, the port 9080 must be free for the master node
