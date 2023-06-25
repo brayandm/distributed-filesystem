@@ -92,4 +92,26 @@ def store_file():
     return "file stored", 200
 
 
+@apiv1.route("/delete", methods=["POST"])
+def delete_file():
+    if not request.json or not "filename" in request.json:
+        return "filename not provided", 400
+
+    filename = request.json["filename"]
+
+    if not redis.exists(filename):
+        return "file does not exist", 400
+
+    chunk_servers = redis.lrange(filename, 0, -1)
+
+    for chunk_server in chunk_servers:
+        chunk_filename, chunk_server = chunk_server.decode("utf-8").split("@")
+
+        requests.post(chunk_server + "/v1/delete", json={"filename": chunk_filename})
+
+    redis.delete(filename)
+
+    return "file deleted", 200
+
+
 app.register_blueprint(apiv1)
