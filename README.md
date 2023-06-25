@@ -21,7 +21,7 @@ cp .env.example .env
 4 - Start docker compose:
 
 ```bash
-docker compose up
+docker compose up -d
 ```
 
 5 - Execute the guest python file:
