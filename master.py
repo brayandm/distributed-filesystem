@@ -2,7 +2,6 @@ from flask import Flask, Blueprint, request, jsonify
 import os
 from redis import Redis
 import uuid
-import random
 import requests
 
 redis = Redis(host=os.environ.get("REDIS_HOST"), port=os.environ.get("REDIS_PORT"))
@@ -29,6 +28,32 @@ def hello_world():
     return "master response: pong"
 
 
+@apiv1.route("/get", methods=["GET"])
+def get_file():
+    if not request.json or not "filename" in request.json:
+        return "filename not provided", 400
+
+    filename = request.json["filename"]
+
+    if not redis.exists(filename):
+        return "file does not exist", 400
+
+    chunk_servers = redis.lrange(filename, 0, -1)
+
+    content = ""
+
+    for chunk_server in chunk_servers:
+        chunk_filename, chunk_server = chunk_server.decode("utf-8").split("@")
+
+        response = requests.get(
+            chunk_server + "/v1/get", json={"filename": chunk_filename}
+        )
+
+        content += response.text
+
+    return content, 200
+
+
 @apiv1.route("/store", methods=["POST"])
 def store_file():
     if (
@@ -48,21 +73,21 @@ def store_file():
 
     chunks = [content[i : i + chunk_size] for i in range(0, len(content), chunk_size)]
 
-    uuids = []
+    chunk_servers = []
 
     for i in range(len(chunks)):
         storage_server = get_server()
 
         chunk_filename = str(uuid.uuid4())
 
-        uuids.append(chunk_filename)
+        chunk_servers.append(chunk_filename + "@" + storage_server)
 
         requests.post(
             storage_server + "/v1/store",
             json={"filename": chunk_filename, "content": chunks[i]},
         )
 
-    redis.rpush(filename, *uuids)
+    redis.rpush(filename, *chunk_servers)
 
     return "file stored", 200
 
