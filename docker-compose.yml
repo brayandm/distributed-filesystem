@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+
+    storageserver1.test:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-storage-server
+        environment:
+            - SERVER_ID=1
+        ports:
+            - "127.0.0.1:9081:80"
+        volumes:
+            - .:/app
+        networks:
+            - distributed-filesystem
+        restart: always
+        command: ["sh", "-c", "flask --app=storage_server run --reload --host=0.0.0.0 --port=80"]
+
+    storageserver2.test:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-storage-server
+        environment:
+            - SERVER_ID=2
+        ports:
+            - "127.0.0.1:9082:80"
+        volumes:
+            - .:/app
+        networks:
+            - distributed-filesystem
+        restart: always
+        command: ["sh", "-c", "flask --app=storage_server run --reload --host=0.0.0.0 --port=80"]
+
+    storageserver3.test:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile-storage-server
+        environment:
+            - SERVER_ID=3
+        ports:
+            - "127.0.0.1:9083:80"
+        volumes:
+            - .:/app
+        networks:
+            - distributed-filesystem
+        restart: always
+        command: ["sh", "-c", "flask --app=storage_server run --reload --host=0.0.0.0 --port=80"]
+
+
+networks:
+    distributed-filesystem:
+        driver: bridge
