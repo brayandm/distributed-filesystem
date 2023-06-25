@@ -17,6 +17,17 @@ storage_servers = [
 ]
 
 
+def get_server():
+    server_id = int(redis.incr("server_counter")) - 1
+
+    return storage_servers[server_id % len(storage_servers)]
+
+
+@apiv1.route("/ping", methods=["GET"])
+def hello_world():
+    return "master response: pong"
+
+
 @apiv1.route("/getsize", methods=["GET"])
 def get_size():
     if not request.json or not "filename" in request.json:
@@ -41,17 +52,6 @@ def get_size():
         size += int(response.text)
 
     return str(size), 200
-
-
-def get_server():
-    server_id = int(redis.incr("server_counter")) - 1
-
-    return storage_servers[server_id % len(storage_servers)]
-
-
-@apiv1.route("/ping", methods=["GET"])
-def hello_world():
-    return "master response: pong"
 
 
 @apiv1.route("/get", methods=["GET"])
