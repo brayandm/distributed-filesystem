@@ -11,6 +11,21 @@ def hello_world():
     return "server " + os.environ.get("SERVER_ID") + " response: pong"
 
 
+@apiv1.route("/getsize", methods=["GET"])
+def get_size():
+    if not request.json or not "filename" in request.json:
+        return "filename not provided", 400
+
+    filename = request.json["filename"]
+
+    storage_path = "storage/server" + os.environ.get("SERVER_ID")
+
+    if not os.path.exists(storage_path + "/" + filename):
+        return "file does not exist", 400
+
+    return str(os.path.getsize(storage_path + "/" + filename)), 200
+
+
 @apiv1.route("/get", methods=["GET"])
 def get_file():
     if not request.json or not "filename" in request.json:
