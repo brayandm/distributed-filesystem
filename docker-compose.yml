@@ -60,6 +60,17 @@ services:
         restart: always
         command: ["sh", "-c", "flask --app=master run --reload --host=0.0.0.0 --port=80"]
 
+    redis:
+        image: redis:7.0.11-alpine3.18
+        ports:
+            - "6375:6379"
+        networks:
+            - distributed-filesystem
+        restart: always
+        healthcheck:
+            test: ["CMD", "redis-cli"]
+            timeout: 5s
+            retries: 3
 
 networks:
     distributed-filesystem:
